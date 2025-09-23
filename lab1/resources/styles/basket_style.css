@@ -1,0 +1,158 @@
+/* body */
+body {
+margin: 0;
+font-family: 'PT Sans', sans-serif;
+background: #F7F7F7;
+
+display: flex;
+justify-content: center; 
+}
+
+/* p */
+p {
+    margin: 0;
+    font-size: 16px;
+    color: #333333;
+}
+
+
+/* heder */
+header {
+position: fixed;   
+top: 0;            
+left: 0; 
+width: 100%;
+height: 96px;
+display: flex;
+align-items: center;
+justify-content: center;
+background: #ffffff;
+}
+
+
+.center-btn {
+display: flex;               
+align-items: center;          
+justify-content: center;      
+width: 415px;
+height: 64px;
+text-decoration: none;
+font-size: 24px;
+font-weight: bold;
+border: none;
+border-radius: 10px;
+background: #FC8507;
+color: white;
+cursor: pointer;
+}
+
+/* order-list */
+.order-list {
+    margin-top: 116px;
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;   
+}
+
+.result-card {
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    width: 1120px;
+    height: 140px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex; 
+}
+
+.result {
+    width: 60px;
+    height: 34px;
+    margin: 0 5px;
+    display: flex;                
+    align-items: center;         
+    justify-content: center;      
+    color: #FC8507
+}
+
+.top-part {
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+}
+
+.bottom-part {
+    display: flex;
+    gap: 25px; 
+}
+
+.hor {
+    display: flex;
+    flex-direction: row;
+}
+
+
+/* card */
+.card {
+    width: 1042px;
+    height: 100px;
+    padding: 39px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;             
+    flex-direction: row;       
+    gap: 10px; 
+    position: relative; 
+}
+
+.card-img {
+    width: 100px;
+    height: 100px;          
+    object-fit: cover;      
+}
+
+.trash-img {
+    width: 26px;
+    height: 26px;
+    position: absolute;  
+    top: 39px;           
+    right: 39px;        
+}
+
+.aligned-text-ver {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.aligned-text-hor {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.input {
+    width: 98px;
+    height: 34px;
+    margin: 0 5px;
+    border: 1px solid #D8D8D8;
+    border-radius: 10px;
+    display: flex;                
+    align-items: center;          
+    justify-content: center;      
+}
+
+.table-field {
+    width: 240px;
+    height: 34px;
+    margin: 0 5px;
+    border: 1px solid #D8D8D8;
+    display: flex;               
+    align-items: center;         
+    justify-content: center;      
+}

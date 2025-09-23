@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <title>Basket</title>
+    <link rel="stylesheet" href="/static/styles/basket_style.css">
+</head>
+<body>
+    <header>
+        <a href="/hello" class="center-btn">Прогноз роста объема данных</a>
+        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    </header>
+
+    <div class="order-list">
+        <div class="result-card">
+            <div class="aligned-text-ver">
+                <div class="top-part">
+                    <p>Прогноз роста объема данных на основе выбранных параметров:</p>
+                    <p class="result">1Мбайт</p>
+                </div>
+                <div class="bottom-part">
+                    <div class="hor">
+                        <div class="aligned-text-ver">
+                            <p>Начало периода:</p>
+                            <p>Конец периода:</p>
+                        </div>
+                        <div class="aligned-text-ver">
+                            <p class="input">10.01.25</p>
+                            <p class="input">20.01.25</p>
+                        </div>
+                    </div>
+
+                    <div class="aligned-text-hor">
+                        <p>Текущее количество данных (б):</p>
+                        <p class="input">100</p>
+                    </div>
+
+                    <div class="aligned-text-hor">
+                        <p>Выбранная таблица:</p>
+                        <p class="table-field">Количество пользователей</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {{ range .basket.Components }}
+        <div class="card">
+            <img class="card-img" src="{{ .Image }}" alt="Изображние">
+            <div class="aligned-text-ver">
+                <div class="aligned-text-hor">
+                    <p>{{ .Title }}:</p> <p class="input">100</p>
+                </div>
+                <p>Коэффициент: {{ .Coeff }}</p>
+            </div>
+            <img class="trash-img" src="/static/img/Trash.png" alt="Мусор">
+        </div>
+        {{ end }}
+    </div>
+</body>
+</html>
+
