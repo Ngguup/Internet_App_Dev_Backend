@@ -41,15 +41,15 @@ cursor: pointer;
 }
 
 
-/* order */
-.order {
+/* dataGrowthFactor */
+.data-growth-factor {
     margin-top: 20px;
     display: flex;
     flex-direction: row;
     gap: 70px; 
 }
 
-.img-part {
+.growth-factor-img {
     width: 500px;    
     max-width: 100%; 
     height: auto;    
@@ -57,7 +57,7 @@ cursor: pointer;
     display: block;  
 }
 
-.text-part {
+.growth-factor-description {
     display: flex;               
     align-items: center;        
     justify-content: center;      

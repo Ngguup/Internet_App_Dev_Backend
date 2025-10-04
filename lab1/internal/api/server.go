@@ -20,14 +20,19 @@ func StartServer() {
 	handler := handler.NewHandler(repo)
 
 	r := gin.Default()
-
+	// добавляем наш html/шаблон
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./resources")
 
-	r.GET("/hello", handler.GetOrders)
-	r.GET("/order/:id", handler.GetOrder)
-	r.GET("/basket", handler.Basket)
+	// r.LoadHTMLGlob("../../templates/*")
+	// r.Static("../../static", "../../resources")
+	// слева название папки, в которую выгрузится наша статика
+	// справа путь к папке, в которой лежит статика
 
-	r.Run() 
+	r.GET("/dataGrowthHome", handler.GetDataGrowthFactors)
+	r.GET("/dataGrowthHome/:id", handler.GetDataGrowthFactor)
+	r.GET("/growthRequest/:id", handler.GrowthRequest)
+
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	log.Println("Server down")
 }

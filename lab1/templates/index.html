@@ -1,30 +1,31 @@
 <html lang="en">
 <head>
-    <title>Predict Data</title>
+    <title>Data Growth Forecast</title>
     <link rel="stylesheet" href="/static/styles/index_style.css">
 </head>
 <body>
     <header>
-        <a href="/hello" class="center-btn">Прогноз роста объема данных</a>
+        <a href="/dataGrowthHome" class="center-btn">Прогноз роста объема данных</a>
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
     </header>
 
-    <a class="basket-img" href="/basket">
-        <img src="/static/img/Basket.png" alt="home">
-        <span class="basket-text">{{ .numOfOrders }}</span>
+    <a class="growth-request-img" href="/growthRequest/{{ .growthRequestID }}">
+        <img src="/static/img/GrowthRequest.png" alt="home">
+        <span class="growth-request-text">{{ .numOfDataGrowthFactors }}</span>
     </a>
 
 
-    <form class=search-form action="/hello" method="GET">
+    <form class=growth-factor-search-form action="/dataGrowthHome" method="GET">
         <input type="text" name="query" placeholder="Поиск фактора роста" value="{{ .query }}">
         <button type="submit"></button>
     </form>
 
-    <div class="cards-grid">
-        {{ range .orders }}
-        <div class="card">
+    <div class="data-growth-factor-cards-grid">
+        {{ range .dataGrowthFactors }}
+        <div class="data-growth-factor-card">
             <img src="{{ .Image }}" alt="Изображние">
-            <a href="/order/{{ .ID }}"> {{ .Title }} </a>
+            <a href="/dataGrowthHome/{{ .ID }}"> {{ .Title }} </a>
+            <p>Коэффициент: {{ .Coeff }}</p>
             <button>Добавить в заявку</button>
         </div>
         {{ end }}

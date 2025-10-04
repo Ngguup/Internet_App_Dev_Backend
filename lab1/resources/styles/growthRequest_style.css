@@ -27,6 +27,7 @@ display: flex;
 align-items: center;
 justify-content: center;
 background: #ffffff;
+z-index: 1000;
 }
 
 
@@ -46,20 +47,23 @@ color: white;
 cursor: pointer;
 }
 
-/* order-list */
-.order-list {
+/* dataGrowthFactor-list */
+.growth-request-list {
     margin-top: 116px;
     display: flex;
     flex-direction: column; 
-    gap: 10px;   
+    gap: 10px; 
+    /* align-items: center;   */
 }
 
-.result-card {
+.result-data-growth-factor-card {
     display: flex;
-    justify-content: center; 
-    align-items: center;     
-    width: 1120px;
-    height: 140px;
+    flex-direction: column;
+    justify-content: space-between; 
+    /* align-items: center;      */
+    width: 1060px;
+    height: 210px;
+    padding: 8px 30px;
     background-color: white;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -77,25 +81,9 @@ cursor: pointer;
     color: #FC8507
 }
 
-.top-part {
-    display: flex;
-    align-items: center; 
-    justify-content: center;
-}
 
-.bottom-part {
-    display: flex;
-    gap: 25px; 
-}
-
-.hor {
-    display: flex;
-    flex-direction: row;
-}
-
-
-/* card */
-.card {
+/* data-growth-factor-card */
+/* .data-growth-factor-card {
     width: 1042px;
     height: 100px;
     padding: 39px;
@@ -107,9 +95,22 @@ cursor: pointer;
     flex-direction: row;       
     gap: 10px; 
     position: relative; 
+} */
+
+.data-growth-factor-card {
+  width: 228px;
+  height: 115px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly; 
+  align-items: center;         
 }
 
-.card-img {
+/* .data-growth-factor-card-img {
     width: 100px;
     height: 100px;          
     object-fit: cover;      
@@ -121,7 +122,7 @@ cursor: pointer;
     position: absolute;  
     top: 39px;           
     right: 39px;        
-}
+} */
 
 .aligned-text-ver {
     display: flex;
@@ -133,7 +134,7 @@ cursor: pointer;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-evenly;
+    /* justify-content: space-evenly; */
 }
 
 .input {
@@ -147,6 +148,13 @@ cursor: pointer;
     justify-content: center;      
 }
 
+.data-growth-factor-list {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+
 .table-field {
     width: 240px;
     height: 34px;
@@ -155,4 +163,17 @@ cursor: pointer;
     display: flex;               
     align-items: center;         
     justify-content: center;      
+}
+
+.delete-btn {
+    width: 228px;
+    height: 34px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    background: #FC8507;
+    color: white;
+    cursor: pointer;
+    /* transition: background 0.2s ease-in-out; */
 }

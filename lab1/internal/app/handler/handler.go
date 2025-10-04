@@ -19,69 +19,75 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) Basket(ctx *gin.Context) {
-	var basket []repository.Basket
+func (h *Handler) GrowthRequest(ctx *gin.Context) {
 	var err error
-	var curBasket repository.Basket
 
-	basket, err = h.Repository.GetBasket()
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	for _, t := range basket { if t.Status { curBasket = t; break } }
+	growthRequest, factorNums, err := h.Repository.GetGrowthRequestByID(id)
+	if err != nil {
+		logrus.Error(err)
+	}
 
-	ctx.HTML(http.StatusOK, "basket.html", gin.H{
-		"basket": curBasket,
+	ctx.HTML(http.StatusOK, "growthRequest.html", gin.H{
+		"growthRequest":     growthRequest,
+		"dataGrowthFactors": growthRequest.Components,
+		"factorNums":        factorNums,
+		"startPeriod":       growthRequest.StartPeriod,
+		"endPeriod":         growthRequest.EndPeriod,
 	})
 }
 
-func (h *Handler) GetOrders(ctx *gin.Context) {
-	var orders []repository.Order
+func (h *Handler) GetDataGrowthFactors(ctx *gin.Context) {
+	var dataGrowthFactors []repository.DataGrowthFactor
 	var err error
-	var basket []repository.Basket
-	var numOfOrders int
+	var growthRequest repository.GrowthRequest
+	growthRequestID :=2
+	growthRequestID -= 1
 
-	basket, err = h.Repository.GetBasket()
+	growthRequest, _, err = h.Repository.GetGrowthRequestByID(growthRequestID)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	for _, t := range basket { if t.Status { numOfOrders = len(t.Components); break } }
-
-	searchQuery := ctx.Query("query")
-	if searchQuery == "" {
-		orders, err = h.Repository.GetOrders()
+	growthFactorSearchQuery := ctx.Query("query")
+	if growthFactorSearchQuery == "" {
+		dataGrowthFactors, err = h.Repository.GetDataGrowthFactors()
 		if err != nil {
 			logrus.Error(err)
 		}
 	} else {
-		orders, err = h.Repository.GetOrdersByTitle(searchQuery)
+		dataGrowthFactors, err = h.Repository.GetDataGrowthFactorsByTitle(growthFactorSearchQuery)
 		if err != nil {
 			logrus.Error(err)
 		}
 	}
 
 	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"numOfOrders": numOfOrders,
-		"orders":      orders,
-		"query":       searchQuery,
+		"numOfDataGrowthFactors": len(growthRequest.Components),
+		"dataGrowthFactors":      dataGrowthFactors,
+		"query":                  growthFactorSearchQuery,
+		"growthRequestID": growthRequestID,
 	})
 }
 
-func (h *Handler) GetOrder(ctx *gin.Context) {
+func (h *Handler) GetDataGrowthFactor(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id, err := strconv.Atoi(idStr) 
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	order, err := h.Repository.GetOrder(id)
+	dataGrowthFactor, err := h.Repository.GetDataGrowthFactor(id)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	ctx.HTML(http.StatusOK, "order.html", gin.H{
-		"order": order,
+	ctx.HTML(http.StatusOK, "dataGrowthFactor.html", gin.H{
+		"dataGrowthFactor": dataGrowthFactor,
 	})
 }

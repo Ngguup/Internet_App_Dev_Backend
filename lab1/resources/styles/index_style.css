@@ -34,8 +34,8 @@ color: white;
 cursor: pointer;
 }
 
-/* basket-button */
-.basket-img {
+/* growthRequest-button */
+.growth-request-img {
   position: fixed;   
   top: 116px;
   right: 52px; 
@@ -44,7 +44,7 @@ cursor: pointer;
   display: inline-block;
 }
 
-.basket-text {
+.growth-request-text {
   position: absolute;   
   top: 31px;           
   right: 8px;          
@@ -54,8 +54,8 @@ cursor: pointer;
 }
 
 
-/* search-form */
-.search-form {
+/* growthFactorSearch-form */
+.growth-factor-search-form {
   display: flex;
   align-items: center;
   width: 552px;
@@ -69,7 +69,7 @@ cursor: pointer;
 }
 
 
-.search-form input[type="text"] {
+.growth-factor-search-form input[type="text"] {
   flex: 1;
   padding-left: 19px;
   font-size: 20px;
@@ -78,7 +78,7 @@ cursor: pointer;
   background: transparent;  
 }
 
-.search-form button {
+.growth-factor-search-form button {
   width: 24px;
   height: 24px;
   border: none;           
@@ -87,8 +87,8 @@ cursor: pointer;
 }
 
 
-/* grid of cards */
-.cards-grid {
+/* grid of data-growth-factor-cards */
+.data-growth-factor-cards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
@@ -96,9 +96,9 @@ cursor: pointer;
   max-width: 950px;
 }
 
-.card {
+.data-growth-factor-card {
   width: 182.4px;
-  height: 265px;
+  height: 300px;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -112,14 +112,14 @@ cursor: pointer;
 }
 
 
-.card img {
+.data-growth-factor-card img {
   width: 182.4px;
   height: 182.4px;           
   object-fit: cover;       
 }
 
 
-.card a {
+.data-growth-factor-card a {
     display: block;
     font-size: 16px;
     text-align: center;
@@ -128,7 +128,18 @@ cursor: pointer;
     color: #333333
 }
 
-.card button {
+.data-growth-factor-card p {
+  margin: 0;
+}
+
+.data-growth-factor-card form {
+    width: 100%;          /* форма растягивается на ширину карточки */
+    display: flex;        /* делаем флексом, чтобы внутри кнопка заняла всю ширину */
+    justify-content: center;
+    margin: 0;            /* убираем отступы по умолчанию */
+}
+
+.data-growth-factor-card button {
     width: 182.4px;
     height: 32px;
     font-size: 16px;
