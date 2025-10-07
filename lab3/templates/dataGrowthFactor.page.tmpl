@@ -1,0 +1,22 @@
+<html lang="en">
+<head>
+    <title>Data Growth Factor</title>
+    <link rel="stylesheet" href="/static/styles/dataGrowthFactor_style.css">
+</head>
+<body>
+    <header>
+        <a href="/dataGrowthHome" class="center-btn">Прогноз роста объема данных</a>
+        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    </header>
+    <div class="data-growth-factor">
+        <img class="growth-factor-img" src="{{ .Image }}" alt="Изображние">
+        <div class="growth-factor-description">
+            <p class="title">{{ .Title }}</p>
+            <div class="ver">
+                <p> {{ .Description }} </p>
+                <p>Коэффициент: {{ .Coeff }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
