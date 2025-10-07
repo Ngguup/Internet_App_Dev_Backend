@@ -1,0 +1,37 @@
+<html lang="en">
+<head>
+    <title>Data Growth Forecast</title>
+    <link rel="stylesheet" href="/static/styles/index_style.css">
+</head>
+<body>
+    <header>
+        <a href="/dataGrowthHome" class="center-btn">Прогноз роста объема данных</a>
+        <link href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    </header>
+
+    <a class="growth-request-img" href="/growthRequest/{{ .growthRequestID }}">
+        <img src="/static/img/GrowthRequest.png" alt="home">
+        <span class="growth-request-text">{{ .numOfDataGrowthFactors }}</span>
+    </a>
+
+
+    <form class=growth-factor-search-form action="/dataGrowthHome" method="GET">
+        <input type="text" name="query" placeholder="Поиск фактора роста" value="{{ .query }}">
+        <button type="submit"></button>
+    </form>
+
+    <div class="data-growth-factor-cards-grid">
+        {{ range .dataGrowthFactors }}
+        <div class="data-growth-factor-card">
+            <img src="{{ .Image }}" alt="Изображние">
+            <a href="/dataGrowthHome/{{ .ID }}"> {{ .Title }} </a>
+            <p>Коэффициент: {{ .Coeff }}</p>
+            <form action="/add-dataGrowthFactor" method="POST">
+                <input type="hidden" name="id" value="{{ .ID }}">
+                <button type="submit">Добавить в заявку</button>
+            </form>
+        </div>
+        {{ end }}
+    </div>
+</body>
+</html>
