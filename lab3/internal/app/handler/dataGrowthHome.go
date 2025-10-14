@@ -27,14 +27,16 @@ func (h *Handler) GrowthRequest_(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 		logrus.Error(err)
-		ctx.String(http.StatusNotFound, "404 page not found")
+		// ctx.String(http.StatusNotFound, "404 page not found")
+		ctx.Redirect(http.StatusFound, "/dataGrowthHome")
 		return
 	}
 
 	growthRequest, dataGrowthFactors, factorNums, err = h.Repository.GetGrowthRequestByID_(id)
 	if err != nil {
 		logrus.Error(err)
-		ctx.String(http.StatusNotFound, "404 page not found")
+		// ctx.String(http.StatusNotFound, "404 page not found")
+		ctx.Redirect(http.StatusFound, "/dataGrowthHome")
 		return
 	}
 

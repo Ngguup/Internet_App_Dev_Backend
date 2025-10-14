@@ -4,14 +4,72 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"strconv"
-	"github.com/sirupsen/logrus"
 	"database/sql"
+	"lab1/internal/app/ds"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
-const CreatorID uint = 1 
+const CreatorID uint = 1
 const ModeratorID uint = 2
+
+type FormattedGrowthRequest struct {
+	ID          uint    `json:"ID"`
+	Status      string  `json:"Status"`
+	DateCreate  string  `json:"DateCreate"`
+	Creator     string  `json:"Creator"`
+	DateUpdate  string  `json:"DateUpdate"`
+	DateFinish  string  `json:"DateFinish"`
+	Moderator   string  `json:"Moderator"`
+	CurData     int     `json:"CurData"`
+	StartPeriod string  `json:"StartPeriod"`
+	EndPeriod   string  `json:"EndPeriod"`
+	Result      float64 `json:"Result"`
+}
+
+// formatTime — вспомогательная функция
+func formatTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format("02.01.06")
+}
+
+// formatNullTime — для sql.NullTime
+func formatNullTime(nt interface{}) string {
+	switch v := nt.(type) {
+	case time.Time:
+		if v.IsZero() {
+			return ""
+		}
+		return v.Format("02.01.06")
+	case *time.Time:
+		if v == nil || v.IsZero() {
+			return ""
+		}
+		return v.Format("02.01.06")
+	default:
+		return ""
+	}
+}
+
+func FormatRequest(req ds.GrowthRequest) FormattedGrowthRequest {
+	return FormattedGrowthRequest{
+		ID:          req.ID,
+		Status:      req.Status,
+		DateCreate:  formatTime(req.DateCreate),
+		Creator:     req.Creator.Login,
+		DateUpdate:  formatTime(req.DateUpdate),
+		DateFinish:  formatNullTime(req.DateFinish.Time),
+		Moderator:   req.Moderator.Login,
+		CurData:     req.CurData,
+		StartPeriod: formatTime(req.StartPeriod),
+		EndPeriod:   formatTime(req.EndPeriod),
+		Result:      req.Result,
+	}
+}
 
 func (h *Handler) GetCartInfo(ctx *gin.Context) {
 	cartID, count, err := h.Repository.GetCartInfo(CreatorID)
@@ -63,9 +121,17 @@ func (h *Handler) GetGrowthRequests(ctx *gin.Context) {
 		return
 	}
 
+	for _, req := range requests {
+		if dateCreate, ok := req["date_create"].(time.Time); ok {
+			req["date_create"] = formatTime(dateCreate)
+		}
+		if dateFinish, ok := req["date_finish"].(time.Time); ok {
+			req["date_finish"] = formatTime(dateFinish)
+		}
+	}
+
 	ctx.JSON(http.StatusOK, requests)
 }
-
 
 func (h *Handler) GetGrowthRequestByID(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -80,17 +146,32 @@ func (h *Handler) GetGrowthRequestByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"growth_request": req,
-		"factors":        factors,
-	})
+	// Формируем ответ
+	response := gin.H{
+		"growth_request": gin.H{
+			"ID":          req.ID,
+			"Status":      req.Status,
+			"DateCreate":  formatTime(req.DateCreate),
+			"Creator":     req.Creator.Login,
+			"DateUpdate":  formatTime(req.DateUpdate),
+			"DateFinish":  req.DateFinish.Time.Format("02.01.06"),
+			"Moderator":   req.Moderator.Login,
+			"CurData":     req.CurData,
+			"StartPeriod": formatTime(req.StartPeriod),
+			"EndPeriod":   formatTime(req.EndPeriod),
+			"Result":      req.Result,
+		},
+		"factors": factors,
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (h *Handler) UpdateGrowthRequest(ctx *gin.Context) {
 	type updateGrowthRequestInput struct {
-		CurData     int       `json:"cur_data"`
-		StartPeriod string    `json:"start_period"`
-		EndPeriod   string    `json:"end_period"`
+		CurData     int    `json:"cur_data"`
+		StartPeriod string `json:"start_period"`
+		EndPeriod   string `json:"end_period"`
 	}
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -118,7 +199,7 @@ func (h *Handler) UpdateGrowthRequest(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, updated)
+	ctx.JSON(http.StatusOK, FormatRequest(*updated))
 }
 
 func (h *Handler) FormGrowthRequest(ctx *gin.Context) {
@@ -168,55 +249,55 @@ func (h *Handler) FormGrowthRequest(ctx *gin.Context) {
 }
 
 func (h *Handler) CompleteOrRejectGrowthRequest(ctx *gin.Context) {
-    idStr := ctx.Param("id")
-    id, err := strconv.Atoi(idStr)
-    if err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
-        return
-    }
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
 
-    action := ctx.Query("action") 
-    if action != "complete" && action != "reject" {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid action"})
-        return
-    }
+	action := ctx.Query("action")
+	if action != "complete" && action != "reject" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid action"})
+		return
+	}
 
-    growthRequest, factors, err := h.Repository.GetGrowthRequestByIDWithFactors(uint(id))
-    if err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	growthRequest, factors, err := h.Repository.GetGrowthRequestByIDWithFactors(uint(id))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    if growthRequest.Status != "сформирован" {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "only formed requests can be completed or rejected"})
-        return
-    }
+	if growthRequest.Status != "сформирован" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "only formed requests can be completed or rejected"})
+		return
+	}
 
-    now := time.Now()
+	now := time.Now()
 
-    switch action {
-		case "complete":
-			var sum float64
-			for _, f := range factors {
-				sum += f.DataGrowthFactor.Coeff * f.FactorNum
-			}
-			duration := growthRequest.EndPeriod.Sub(growthRequest.StartPeriod).Hours() / 24
-			growthRequest.Result = float64(growthRequest.CurData) + sum*duration
-			growthRequest.Status = "завершен"
-		case "reject":
-			growthRequest.Status = "отклонен"
+	switch action {
+	case "complete":
+		var sum float64
+		for _, f := range factors {
+			sum += f.DataGrowthFactor.Coeff * f.FactorNum
 		}
+		duration := growthRequest.EndPeriod.Sub(growthRequest.StartPeriod).Hours() / 24
+		growthRequest.Result = float64(growthRequest.CurData) + sum*duration
+		growthRequest.Status = "завершен"
+	case "reject":
+		growthRequest.Status = "отклонен"
+	}
 
-    growthRequest.ModeratorID = ModeratorID
-    growthRequest.DateFinish = sql.NullTime{Time: now, Valid: true}
+	growthRequest.ModeratorID = ModeratorID
+	growthRequest.DateFinish = sql.NullTime{Time: now, Valid: true}
 	growthRequest.DateUpdate = now
 
-    if err := h.Repository.SaveGrowthRequest(growthRequest); err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	if err := h.Repository.SaveGrowthRequest(growthRequest); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    ctx.JSON(http.StatusOK, gin.H{"message": "success", "result": growthRequest.Result})
+	ctx.JSON(http.StatusOK, gin.H{"message": "success", "result": growthRequest.Result})
 }
 
 func (h *Handler) DeleteGrowthRequest(ctx *gin.Context) {

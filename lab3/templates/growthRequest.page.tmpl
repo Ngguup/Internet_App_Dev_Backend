@@ -33,7 +33,7 @@
             </div>
         </div>
 
-        <div class="data-growth-factor-list">
+        <!-- <div class="data-growth-factor-list"> -->
             <!-- {{ range .dataGrowthFactors }}
             <div class="data-growth-factor-card">
                 <p> {{ .Title }} </p>
@@ -41,14 +41,29 @@
                 <p>Коэффициент: {{ .Coeff }}</p>
             </div>
             {{ end }} -->
-            {{ range $i, $factor := .dataGrowthFactors }}
+
+            <!-- {{ range $i, $factor := .dataGrowthFactors }}
                 <div class="data-growth-factor-card">
                     <p>{{ $factor.Title }}</p>
                     <p class="input">{{ index $.factorNums $i }}</p>
                     <p>Коэффициент: {{ $factor.Coeff }}</p>
                 </div>
-            {{ end }}
+            {{ end }} -->
+        <!-- </div> -->
+
+        {{ range $i, $factor := .dataGrowthFactors }}
+        <div class="data-growth-factor-card">
+            <div class="aligned-text-hor">
+                <p>{{ $factor.Attribute }}:</p> <p class="input">{{ index $.factorNums $i }}</p>
+            </div>
+
+            <div class="data-growth-factor-card-field">
+                <img class="data-growth-factor-card-img" src="{{ $factor.Image }}" alt="Изображние">
+                <p>Коэффициент: {{ $factor.Coeff }}</p>
+            </div>
         </div>
+        {{ end }}
+        
         <form class="delete-form" action="/delete-growthRequest" method="POST">
             <button type="submit" class="delete-btn">Удалить прогноз</button>
         </form>

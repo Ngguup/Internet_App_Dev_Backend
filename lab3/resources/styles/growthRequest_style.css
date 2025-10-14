@@ -97,7 +97,7 @@ cursor: pointer;
     position: relative; 
 } */
 
-.data-growth-factor-card {
+/* .data-growth-factor-card {
   width: 228px;
   height: 115px;
   background: #fff;
@@ -108,14 +108,38 @@ cursor: pointer;
   flex-direction: column;
   justify-content: space-evenly; 
   align-items: center;         
+} */
+
+.data-growth-factor-card {
+    width: 1042px;
+    height: 150px;
+    padding: 39px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;             
+    flex-direction: column;       
+    position: relative; 
+    justify-content: space-between; 
 }
 
-/* .data-growth-factor-card-img {
+
+.data-growth-factor-card-field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+
+ .data-growth-factor-card-img {
     width: 100px;
     height: 100px;          
     object-fit: cover;      
 }
 
+/*
 .trash-img {
     width: 26px;
     height: 26px;

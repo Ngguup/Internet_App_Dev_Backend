@@ -1,5 +1,6 @@
 package ds
 
+
 import (
 	"database/sql"
 	"time"
@@ -20,6 +21,7 @@ type GrowthRequest struct {
 	EndPeriod   time.Time `gorm:"type:date"` 
 	Result      float64 `gorm:"type:double precision"`
 
-	Creator   Users `gorm:"foreignKey:CreatorID"`
-	Moderator Users `gorm:"foreignKey:ModeratorID"`
+	Creator   Users `gorm:"foreignKey:CreatorID" json:"-"`
+	Moderator Users `gorm:"foreignKey:ModeratorID" json:"-"`
+
 }

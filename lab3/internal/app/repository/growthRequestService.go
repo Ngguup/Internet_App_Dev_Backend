@@ -38,7 +38,7 @@ func (r *Repository) GetGrowthRequests(status string, startDate, endDate time.Ti
                 creator.login AS creator_login, moderator.login AS moderator_login`).
 		Joins("JOIN users AS creator ON creator.id = growth_requests.creator_id").
 		Joins("LEFT JOIN users AS moderator ON moderator.id = growth_requests.moderator_id").
-		Where("growth_requests.status != ?", "удален")
+		Where("growth_requests.status != ?", "удалён")
 
 	if status != "" {
 		query = query.Where("growth_requests.status = ?", status)
@@ -56,7 +56,7 @@ func (r *Repository) GetGrowthRequests(status string, startDate, endDate time.Ti
 	return result, nil
 }
 
-func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []ds.DataGrowthFactor, error) {
+func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []map[string]interface{}, error) {
 	var req ds.GrowthRequest
 	if err := r.db.Preload("Creator").Preload("Moderator").First(&req, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -65,18 +65,56 @@ func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []ds.Dat
 		return ds.GrowthRequest{}, nil, err
 	}
 
-	var factors []ds.DataGrowthFactor
-	if err := r.db.
-		Table("data_growth_factors").
-		Joins("JOIN growth_request_data_growth_factors grdf ON grdf.data_growth_factor_id = data_growth_factors.id").
+	// Загружаем факторы вместе с factor_num
+	rows, err := r.db.
+		Table("data_growth_factors AS dgf").
+		Select(`
+			dgf.id, 
+			dgf.title, 
+			dgf.image, 
+			dgf.coeff, 
+			dgf.description, 
+			dgf.is_delete,
+			grdf.factor_num
+		`).
+		Joins("JOIN growth_request_data_growth_factors grdf ON grdf.data_growth_factor_id = dgf.id").
 		Where("grdf.growth_request_id = ?", req.ID).
-		Where("data_growth_factors.is_delete = false").
-		Find(&factors).Error; err != nil {
+		Where("dgf.is_delete = false").
+		Rows()
+	if err != nil {
 		return req, nil, err
+	}
+	defer rows.Close()
+
+	var factors []map[string]interface{}
+	for rows.Next() {
+		var (
+			id          uint
+			title       string
+			image       string
+			coeff       float64
+			description string
+			isDelete    bool
+			factorNum   float64
+		)
+		if err := rows.Scan(&id, &title, &image, &coeff, &description, &isDelete, &factorNum); err != nil {
+			return req, nil, err
+		}
+
+		factors = append(factors, map[string]interface{}{
+			"ID":          id,
+			"Title":       title,
+			"Image":       image,
+			"Coeff":       coeff,
+			"Description": description,
+			"IsDelete":    isDelete,
+			"FactorNum":   factorNum,
+		})
 	}
 
 	return req, factors, nil
 }
+
 
 func (r *Repository) UpdateGrowthRequest(id uint, curData int, startPeriod, endPeriod time.Time) (*ds.GrowthRequest, error) {
 	var gr ds.GrowthRequest
@@ -139,7 +177,7 @@ func (r *Repository) DeleteGrowthRequest(id uint, creatorID uint) error {
 	result := r.db.Model(&ds.GrowthRequest{}).
 		Where("id = ? AND creator_id = ? AND status = ?", id, creatorID, "черновик").
 		Updates(map[string]interface{}{
-			"status":      "удален",
+			"status":      "удалён",
 			"date_finish": time.Now(),
 			"date_update": time.Now(),
 		})

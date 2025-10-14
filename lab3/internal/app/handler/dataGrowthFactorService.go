@@ -58,6 +58,7 @@ func (h *Handler) CreateDataGrowthFactor(ctx *gin.Context) {
 	newFactor := ds.DataGrowthFactor{
 		Title:       input.Title,
 		Description: input.Description,
+		Attribute:   input.Attribute,
 		Coeff:       input.Coeff,
 		Image:       "",
 		IsDelete:    false,

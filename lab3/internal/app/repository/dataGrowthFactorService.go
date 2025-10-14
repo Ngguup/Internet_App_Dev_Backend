@@ -45,6 +45,7 @@ func (r *Repository) UpdateDataGrowthFactor(id uint, input *ds.DataGrowthFactor)
 			"title":       input.Title,
 			"coeff":       input.Coeff,
 			"description": input.Description,
+			"attribute":   input.Attribute,
 		}).Error
 }
 
