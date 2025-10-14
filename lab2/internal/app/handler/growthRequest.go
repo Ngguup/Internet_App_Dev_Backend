@@ -7,12 +7,10 @@ import (
 
 
 func (h *Handler) DeleteDataGrowthFactor(ctx *gin.Context) {
-	// Вызов функции добавления чата в заявку
 	err := h.Repository.DeleteGrowthRequest()
 	if err != nil && !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return
 	}
 
-	// после вызова сразу произойдет обновление страницы
 	ctx.Redirect(http.StatusFound, "/dataGrowthHome")
 }

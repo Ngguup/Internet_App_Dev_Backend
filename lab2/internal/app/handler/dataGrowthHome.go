@@ -117,7 +117,6 @@ func (h *Handler) GetDataGrowthFactorById(ctx *gin.Context) {
 }
 
 func (h *Handler) AddDataGrowthFactor(ctx *gin.Context) {
-	// считываем значение из формы, которую мы добавим в наш шаблон
 	strId := ctx.PostForm("id")
 	id, err := strconv.Atoi(strId)
 	if err != nil {
@@ -125,13 +124,11 @@ func (h *Handler) AddDataGrowthFactor(ctx *gin.Context) {
 			"error": err.Error(),
 		})
 	}
-	// Вызов функции добавления чата в заявку
 	err = h.Repository.AddDataGrowthFactor(uint(id))
 	if err != nil && !strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return
 	}
 
-	// после вызова сразу произойдет обновление страницы
 	ctx.Redirect(http.StatusFound, "/dataGrowthHome")
 }
 

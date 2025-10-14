@@ -133,10 +133,10 @@ cursor: pointer;
 }
 
 .data-growth-factor-card form {
-    width: 100%;          /* форма растягивается на ширину карточки */
-    display: flex;        /* делаем флексом, чтобы внутри кнопка заняла всю ширину */
+    width: 100%;          
+    display: flex;        
     justify-content: center;
-    margin: 0;            /* убираем отступы по умолчанию */
+    margin: 0;           
 }
 
 .data-growth-factor-card form button {

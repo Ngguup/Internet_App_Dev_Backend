@@ -74,19 +74,17 @@ func (r *Repository) GetDataGrowthFactorByID(id int) (*ds.DataGrowthFactor, erro
 
 func (r *Repository) SearchDataGrowthFactorsByName(name string) ([]ds.DataGrowthFactor, error) {
 	var dataGrowthFactors []ds.DataGrowthFactor
-	err := r.db.Where("title ILIKE ? and is_delete = ?", "%"+name+"%", false).Find(&dataGrowthFactors).Error // добавили условие
+	err := r.db.Where("title ILIKE ? and is_delete = ?", "%"+name+"%", false).Find(&dataGrowthFactors).Error 
 	if err != nil {
 		return nil, err
 	}
 	return dataGrowthFactors, nil
 }
 
-// GetGrowthRequestData для получения количества услуг в заявке (чатов в сообщении в моем случае)
 func (r *Repository) GetGrowthRequestData() (uint, int64) {
 	var growthRequestID uint
 	var count int64
 	creatorID := 1
-	// пока что мы захардкодили id создателя заявки, в последующем вы сделаете авторизацию и будете получать его из JWT
 
 	err := r.db.Model(&ds.GrowthRequest{}).Where("creator_id = ? AND status = ?", creatorID, "черновик").Select("id").First(&growthRequestID).Error
 	if err != nil {

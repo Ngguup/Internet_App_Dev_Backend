@@ -17,7 +17,6 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-// RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
 func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.GET("/dataGrowthHome", h.GetAllDataGrowthFactors)
 	router.GET("/dataGrowthHome/:id", h.GetDataGrowthFactorById)
@@ -27,13 +26,11 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.POST("/delete-growthRequest", h.DeleteDataGrowthFactor)
 }
 
-// RegisterStatic То же самое, что и с маршрутами, регистрируем статику
 func (h *Handler) RegisterStatic(router *gin.Engine) {
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/static", "./resources")
 }
 
-// errorHandler для более удобного вывода ошибок
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
 	logrus.Error(err.Error())
 	ctx.JSON(errorStatusCode, gin.H{
