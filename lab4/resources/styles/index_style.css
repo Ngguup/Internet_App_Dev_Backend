@@ -1,0 +1,154 @@
+body {
+margin: 0;
+font-family: 'PT Sans', sans-serif;
+background: #F7F7F7;
+}
+
+/* heder */
+header {
+position: fixed;   
+top: 0;            
+left: 0; 
+width: 100%;
+height: 96px;
+display: flex;
+align-items: center;
+justify-content: center;
+background: #ffffff;
+}
+
+
+.center-btn {
+display: flex;               
+align-items: center;          
+justify-content: center;      
+width: 415px;
+height: 64px;
+text-decoration: none;
+font-size: 24px;
+font-weight: bold;
+border: none;
+border-radius: 10px;
+background: #FC8507;
+color: white;
+cursor: pointer;
+}
+
+/* growthRequest-button */
+.growth-request-img {
+  position: fixed;   
+  top: 116px;
+  right: 52px; 
+  width: 64px;
+  height: 64px;
+  display: inline-block;
+}
+
+.growth-request-text {
+  position: absolute;   
+  top: 31px;           
+  right: 8px;          
+  color: #afafaf;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+
+/* growthFactorSearch-form */
+.growth-factor-search-form {
+  display: flex;
+  align-items: center;
+  width: 552px;
+  height: 62px;
+  margin: 20px auto;
+  margin-top: 116px;
+  border: 1px solid #EEEEEE;  
+  padding-right: 19px; 
+  border-radius: 10px;      
+  overflow: hidden;         
+}
+
+
+.growth-factor-search-form input[type="text"] {
+  flex: 1;
+  padding-left: 19px;
+  font-size: 20px;
+  border: none;             
+  outline: none;
+  background: transparent;  
+}
+
+.growth-factor-search-form button {
+  width: 24px;
+  height: 24px;
+  border: none;           
+  background: url("/static/img/search-icon.png") center/24px no-repeat transparent;
+  cursor: pointer;
+}
+
+
+/* grid of data-growth-factor-cards */
+.data-growth-factor-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 0px auto;
+  max-width: 950px;
+}
+
+.data-growth-factor-card {
+  width: 182.4px;
+  height: 300px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 22.8px;
+  
+  justify-content: space-between; 
+  align-items: center;          
+}
+
+
+.data-growth-factor-card img {
+  width: 182.4px;
+  height: 182.4px;           
+  object-fit: cover;       
+}
+
+
+.data-growth-factor-card a {
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333333
+}
+
+.data-growth-factor-card p {
+  margin: 0;
+}
+
+.data-growth-factor-card form {
+    width: 100%;         
+    display: flex;       
+    justify-content: center;
+    margin: 0;           
+}
+
+.data-growth-factor-card form button {
+    width: 182.4px;
+    height: 32px;
+    font-size: 16px;
+    color: #333333;
+    border: 1px solid #D8D8D8;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+    align-self: center;
+}
+
+

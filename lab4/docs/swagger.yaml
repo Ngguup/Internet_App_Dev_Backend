@@ -1,0 +1,733 @@
+basePath: /
+definitions:
+  ds.DataGrowthFactor:
+    properties:
+      attribute:
+        type: string
+      coeff:
+        type: number
+      description:
+        type: string
+      id:
+        type: integer
+      image:
+        type: string
+      isDelete:
+        type: boolean
+      title:
+        type: string
+    type: object
+  handler.FormattedGrowthRequest:
+    properties:
+      Creator:
+        type: string
+      CurData:
+        type: integer
+      DateCreate:
+        type: string
+      DateFinish:
+        type: string
+      DateUpdate:
+        type: string
+      EndPeriod:
+        type: string
+      ID:
+        type: integer
+      Moderator:
+        type: string
+      Result:
+        type: number
+      StartPeriod:
+        type: string
+      Status:
+        type: string
+    type: object
+  handler.loginReq:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.loginResp:
+    properties:
+      access_token:
+        type: string
+      token_type:
+        type: string
+    type: object
+  handler.registerReq:
+    properties:
+      login:
+        description: лучше назвать то же самое что login
+        type: string
+      password:
+        type: string
+    type: object
+  handler.registerResp:
+    properties:
+      ok:
+        type: boolean
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: bitop@spatecon.ru
+    name: API Support
+    url: https://vk.com/bmstu_schedule
+  description: BMSTU Open IT Platform. API для работы с услугами (dataGrowthFactor),
+    заявками (growthRequest) и пользователями.
+  license:
+    name: AS IS (NO WARRANTY)
+  title: BITOP
+  version: "1.0"
+paths:
+  /api/data-growth-factors:
+    get:
+      description: Возвращает все услуги (факторы роста) с возможностью фильтрации
+        по названию
+      parameters:
+      - description: Фильтр по названию
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.DataGrowthFactor'
+            type: array
+      summary: Получить список услуг
+      tags:
+      - data_growth_factors
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новую услугу (фактор роста)
+      parameters:
+      - description: Данные новой услуги
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ds.DataGrowthFactor'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.DataGrowthFactor'
+      summary: Добавить услугу
+      tags:
+      - data_growth_factors
+  /api/data-growth-factors/{id}:
+    delete:
+      description: Удаляет услугу (меняет флаг удаления или полностью удаляет запись)
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: DataGrowthFactor deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: data_growth_factor not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить услугу
+      tags:
+      - data_growth_factors
+    get:
+      description: Возвращает услугу (фактор роста) по её идентификатору
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.DataGrowthFactor'
+        "404":
+          description: Услуга не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить услугу по ID
+      tags:
+      - data_growth_factors
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию об услуге (факторе роста)
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновлённые данные
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/ds.DataGrowthFactor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Обновить услугу
+      tags:
+      - data_growth_factors
+  /api/data-growth-factors/{id}/add:
+    post:
+      description: Добавляет выбранную услугу в текущую заявку пользователя со статусом
+        "черновик"
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: DataGrowthFactor added to draft successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Добавить услугу в заявку-черновик
+      tags:
+      - data_growth_factors
+  /api/data-growth-factors/{id}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает изображение в MinIO и сохраняет URL в базе данных
+      parameters:
+      - description: ID услуги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Изображение
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: image_url
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Загрузить изображение услуги
+      tags:
+      - data_growth_factors
+  /api/growth-request-data-growth-factors/{id}:
+    delete:
+      description: Удаляет DataGrowthFactor из черновика текущего пользователя
+      parameters:
+      - description: ID фактора роста
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить фактор роста из черновика
+      tags:
+      - growth_request_data_growth_factors
+    put:
+      consumes:
+      - application/json
+      description: Обновляет числовое значение factor_num для DataGrowthFactor в корзине
+        текущего пользователя
+      parameters:
+      - description: ID фактора роста
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить значение factor_num
+      tags:
+      - growth_request_data_growth_factors
+  /api/growth-requests:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все заявки с фильтрацией по статусу и дате
+      parameters:
+      - description: Статус заявки
+        in: query
+        name: status
+        type: string
+      - description: 'Дата начала периода (формат: 02.01.06)'
+        in: query
+        name: start_date
+        type: string
+      - description: 'Дата конца периода (формат: 02.01.06)'
+        in: query
+        name: end_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список заявок на рост
+      tags:
+      - growth_requests
+  /api/growth-requests/{id}:
+    delete:
+      description: Удаляет заявку пользователя
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить заявку на рост
+      tags:
+      - growth_requests
+    get:
+      description: Возвращает заявку и связанные с ней факторы
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить заявку по ID
+      tags:
+      - growth_requests
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные заявки (текущие данные, период)
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Поля для обновления
+        in: body
+        name: input
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.FormattedGrowthRequest'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить заявку на рост
+      tags:
+      - growth_requests
+  /api/growth-requests/{id}/complete:
+    put:
+      description: Меняет статус заявки на завершен или отклонен
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Действие (complete или reject)
+        in: query
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Завершить или отклонить заявку
+      tags:
+      - growth_requests
+  /api/growth-requests/{id}/form:
+    put:
+      description: Изменяет статус черновика на "сформирован" при наличии всех обязательных
+        полей
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Сформировать заявку на рост
+      tags:
+      - growth_requests
+  /api/growth-requests/cart:
+    get:
+      description: Возвращает данные о корзине в зависимости от роли (creator или
+        moderator)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получение информации о корзине пользователя
+      tags:
+      - growth_requests
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентификация пользователя и выдача JWT
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.loginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.loginResp'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Вход пользователя
+      tags:
+      - users
+  /api/users/logout:
+    post:
+      description: Разлогинивает пользователя и добавляет JWT в черный список
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Выход пользователя
+      tags:
+      - users
+  /api/users/me:
+    get:
+      description: Возвращает информацию о текущем пользователе
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить текущего пользователя
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет логин, пароль и роль текущего пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить пользователя
+      tags:
+      - users
+  /api/users/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с ролью Creator
+      parameters:
+      - description: Логин и пароль
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.registerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.registerResp'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация пользователя
+      tags:
+      - users
+schemes:
+- http
+swagger: "2.0"
