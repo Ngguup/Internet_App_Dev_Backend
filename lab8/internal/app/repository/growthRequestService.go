@@ -67,9 +67,11 @@ func (r *Repository) GetGrowthRequests(status string, startDate, endDate time.Ti
                 growth_requests.status,
                 growth_requests.date_create,
                 growth_requests.date_finish,
+				growth_requests.date_update,
                 growth_requests.creator_id,
-                growth_requests.moderator_id`).
-		Where("growth_requests.status != ?", "удалён")
+                growth_requests.moderator_id,
+				growth_requests.result`).
+		Where("growth_requests.status NOT IN ?", []string{"удалён", "черновик"})
 
 	if status != "" {
 		query = query.Where("growth_requests.status = ?", status)
@@ -106,6 +108,7 @@ func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []map[st
 			dgf.coeff, 
 			dgf.description, 
 			dgf.is_delete,
+			dgf.attribute,
 			grdf.factor_num
 		`).
 		Joins("JOIN growth_request_data_growth_factors grdf ON grdf.data_growth_factor_id = dgf.id").
@@ -126,9 +129,10 @@ func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []map[st
 			coeff       float64
 			description string
 			isDelete    bool
+			attribute   string
 			factorNum   float64
 		)
-		if err := rows.Scan(&id, &title, &image, &coeff, &description, &isDelete, &factorNum); err != nil {
+		if err := rows.Scan(&id, &title, &image, &coeff, &description, &isDelete, &attribute, &factorNum); err != nil {
 			return req, nil, err
 		}
 
@@ -139,6 +143,7 @@ func (r *Repository) GetGrowthRequestByID(id string) (ds.GrowthRequest, []map[st
 			"Coeff":       coeff,
 			"Description": description,
 			"IsDelete":    isDelete,
+			"Attribute":   attribute,
 			"FactorNum":   factorNum,
 		})
 	}

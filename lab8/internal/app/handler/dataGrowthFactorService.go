@@ -21,13 +21,39 @@ import (
 // @Description  Возвращает все услуги (факторы роста) с возможностью фильтрации по названию
 // @Tags         data_growth_factors
 // @Produce      json
-// @Param        title  query  string  false  "Фильтр по названию"
+// @Param        title  query  string  false  "Фильтр по названию2"
+// @Param        min_coeff  query  string  false "Минимальный коэффициент" 
+// @Param        max_coeff  query  string  false "Максимальный коэффициент"
 // @Success      200  {array}  ds.DataGrowthFactor
 // @Router       /api/data-growth-factors [get]
 func (h *Handler) GetAllDataGrowthFactors(ctx *gin.Context) {
 	title := ctx.Query("title")
 
-	factors, err := h.Repository.GetAllDataGrowthFactors(title)
+	// Читаем диапазон коэффициента
+	minCoeffStr := ctx.Query("min_coeff")
+	maxCoeffStr := ctx.Query("max_coeff")
+
+	var minCoeff, maxCoeff *float64
+
+	if minCoeffStr != "" {
+		val, err := strconv.ParseFloat(minCoeffStr, 64)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid min_coeff"})
+			return
+		}
+		minCoeff = &val
+	}
+
+	if maxCoeffStr != "" {
+		val, err := strconv.ParseFloat(maxCoeffStr, 64)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid max_coeff"})
+			return
+		}
+		maxCoeff = &val
+	}
+
+	factors, err := h.Repository.GetAllDataGrowthFactors(title, minCoeff, maxCoeff)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -35,6 +61,7 @@ func (h *Handler) GetAllDataGrowthFactors(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, factors)
 }
+
 
 // GetDataGrowthFactorByID godoc
 // @Summary      Получить услугу по ID
@@ -72,6 +99,7 @@ func (h *Handler) GetDataGrowthFactorByID(ctx *gin.Context) {
 // @Tags         data_growth_factors
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        data  body  ds.DataGrowthFactor  true  "Данные новой услуги"
 // @Success      201  {object}  ds.DataGrowthFactor
 // @Router       /api/data-growth-factors [post]
@@ -106,6 +134,7 @@ func (h *Handler) CreateDataGrowthFactor(ctx *gin.Context) {
 // @Tags         data_growth_factors
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        id    path  int  true  "ID услуги"
 // @Param        data  body  ds.DataGrowthFactor  true  "Обновлённые данные"
 // @Success      200   {object}  map[string]interface{}
@@ -137,6 +166,7 @@ func (h *Handler) UpdateDataGrowthFactor(ctx *gin.Context) {
 // @Summary      Удалить услугу
 // @Description  Удаляет услугу (меняет флаг удаления или полностью удаляет запись)
 // @Tags         data_growth_factors
+// @Security BearerAuth
 // @Param        id   path  int  true  "ID услуги"
 // @Success      200  {object}  map[string]string  "DataGrowthFactor deleted successfully"
 // @Failure      404  {object}  map[string]string  "data_growth_factor not found"
@@ -166,6 +196,7 @@ func (h *Handler) DeleteDataGrowthFactor(ctx *gin.Context) {
 // @Summary      Добавить услугу в заявку-черновик
 // @Description  Добавляет выбранную услугу в текущую заявку пользователя со статусом "черновик"
 // @Tags         data_growth_factors
+// @Security BearerAuth
 // @Param        id   path  int  true  "ID услуги"
 // @Success      200  {object}  map[string]string  "DataGrowthFactor added to draft successfully"
 // @Router       /api/data-growth-factors/{id}/add [post]
@@ -191,6 +222,7 @@ func (h *Handler) AddDataGrowthFactorToDraft(ctx *gin.Context) {
 // @Tags         data_growth_factors
 // @Accept       multipart/form-data
 // @Produce      json
+// @Security BearerAuth
 // @Param        id     path      int     true   "ID услуги"
 // @Param        image  formData  file    true   "Изображение"
 // @Success      200    {object}  map[string]string  "image_url"

@@ -10,6 +10,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"bytes"
+	"encoding/json"
 )
 
 type FormattedGrowthRequest struct {
@@ -78,13 +81,23 @@ func FormatRequest(req ds.GrowthRequest) FormattedGrowthRequest {
 // @Description Возвращает данные о корзине в зависимости от роли (creator или moderator)
 // @Tags growth_requests
 // @Produce json
+// @Security BearerAuth
 // @Success 200 {object} map[string]interface{}
 // @Failure 403 "Forbidden"
 // @Failure 500 {object} map[string]string
 // @Router /api/growth-requests/cart [get]
 func (h *Handler) GetCartInfo(ctx *gin.Context) {
-	userRole := ctx.GetInt("role")
-	userID := GetUserID(ctx)
+	claims, err := h.ParseAndValidateJWT(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"growth_request_id": 0,
+			"service_count":     0,
+		})
+		return
+	}
+
+	userRole := claims.Role
+	userID := claims.UserID
 
 	switch role.Role(userRole) {
 	case role.Moderator:
@@ -113,17 +126,18 @@ func (h *Handler) GetCartInfo(ctx *gin.Context) {
 		return
 
 	default:
-		ctx.AbortWithStatus(http.StatusForbidden)
+		// ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 }
 
 // GetGrowthRequests godoc
-// @Summary Получить список заявок на рост
+// @Summary Получить список заявок на рост 2
 // @Description Возвращает все заявки с фильтрацией по статусу и дате
 // @Tags growth_requests
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param status query string false "Статус заявки"
 // @Param start_date query string false "Дата начала периода (формат: 02.01.06)"
 // @Param end_date query string false "Дата конца периода (формат: 02.01.06)"
@@ -171,6 +185,9 @@ func (h *Handler) GetGrowthRequests(ctx *gin.Context) {
 		if dateFinish, ok := req["date_finish"].(time.Time); ok {
 			req["date_finish"] = formatTime(dateFinish)
 		}
+		if dateUpdate, ok := req["date_update"].(time.Time); ok {
+			req["date_update"] = formatTime(dateUpdate)
+		}
 	}
 
 	switch role.Role(userRole) {
@@ -178,13 +195,13 @@ func (h *Handler) GetGrowthRequests(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, requests)
 		return
 	case role.Creator:
+		creatorRequests := make([]map[string]interface{}, 0)
 		for _, req := range requests {
 			if req["creator_id"] == userID {
-				ctx.JSON(http.StatusOK, req)
-				return
+				creatorRequests = append(creatorRequests, req)
 			}
 		}
-		ctx.JSON(http.StatusOK, struct{}{})
+		ctx.JSON(http.StatusOK, creatorRequests)
 		return
 	default:
 		ctx.AbortWithStatus(http.StatusForbidden)
@@ -198,6 +215,7 @@ func (h *Handler) GetGrowthRequests(ctx *gin.Context) {
 // @Description Возвращает заявку и связанные с ней факторы
 // @Tags growth_requests
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID заявки"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
@@ -226,6 +244,7 @@ func (h *Handler) GetGrowthRequestByID(ctx *gin.Context) {
 // @Tags growth_requests
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID заявки"
 // @Param input body object true "Поля для обновления"
 // @Success 200 {object} FormattedGrowthRequest
@@ -272,6 +291,7 @@ func (h *Handler) UpdateGrowthRequest(ctx *gin.Context) {
 // @Description Изменяет статус черновика на "сформирован" при наличии всех обязательных полей
 // @Tags growth_requests
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID заявки"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]string
@@ -330,6 +350,7 @@ func (h *Handler) FormGrowthRequest(ctx *gin.Context) {
 // @Description Меняет статус заявки на завершен или отклонен
 // @Tags growth_requests
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID заявки"
 // @Param action query string true "Действие (complete или reject)"
 // @Success 200 {object} map[string]interface{}
@@ -361,39 +382,125 @@ func (h *Handler) CompleteOrRejectGrowthRequest(ctx *gin.Context) {
 		return
 	}
 
-	now := time.Now()
+	moderatorID := GetUserID(ctx)
 
 	switch action {
 	case "complete":
-		var sum float64
-		for _, f := range factors {
-			sum += f.DataGrowthFactor.Coeff * f.FactorNum
+		// var sum float64
+		// for _, f := range factors {
+		// 	sum += f.DataGrowthFactor.Coeff * f.FactorNum
+		// }
+		// duration := growthRequest.EndPeriod.Sub(growthRequest.StartPeriod).Hours() / 24
+		// growthRequest.Result = float64(growthRequest.CurData) + sum*duration
+		// growthRequest.Status = "завершен"
+		requestBody := map[string]interface{}{
+			"moderator_id": &moderatorID,
+			"growth_request": growthRequest,
+			"factors": factors,
 		}
-		duration := growthRequest.EndPeriod.Sub(growthRequest.StartPeriod).Hours() / 24
-		growthRequest.Result = float64(growthRequest.CurData) + sum*duration
-		growthRequest.Status = "завершен"
+
+		jsonBody, err := json.Marshal(requestBody)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot encode body"})
+			return
+		}
+		url := "http://0.0.0.0:8000/"
+		req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot create request"})
+			return
+		}
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			ctx.JSON(http.StatusBadGateway, gin.H{"error": "cannot reach remote service"})
+			return
+		}
+		defer resp.Body.Close()
 	case "reject":
+		now := time.Now()
 		growthRequest.Status = "отклонен"
+		growthRequest.ModeratorID = &moderatorID
+		growthRequest.DateFinish = sql.NullTime{Time: now, Valid: true}
+		growthRequest.DateUpdate = now
+
+		if err := h.Repository.SaveGrowthRequest(growthRequest); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
-	moderatorID := GetUserID(ctx)
-	growthRequest.ModeratorID = &moderatorID
+	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
+}
+
+
+// UpdateGrowthRequestResult godoc
+// @Summary Добавить результат в заявку
+// @Description Добавляет в заявку результат
+// @Tags growth_requests
+// @Produce json
+// @Param id path int true "ID заявки"
+// @Param input body object true "Поля для обновления"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/growth-requests/{id}/result [put]
+func (h *Handler) UpdateGrowthRequestResult(ctx *gin.Context) {
+	const defToken = "ABCDEF12"
+
+	type updateGrowthRequestResultInput struct {
+		Result     float64    `json:"result"`
+		Token      string     `json:"token"`
+		ModeratorID uint       `json:"moderator_id"`
+	}
+
+	idStr := ctx.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+	var input updateGrowthRequestResultInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if input.Token != defToken {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid token"})
+		return
+	}
+
+	growthRequest, _, err := h.Repository.GetGrowthRequestByIDWithFactors(uint(id))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	
+	now := time.Now()
+	growthRequest.Status = "завершён"
+	growthRequest.ModeratorID = &input.ModeratorID
 	growthRequest.DateFinish = sql.NullTime{Time: now, Valid: true}
 	growthRequest.DateUpdate = now
+	growthRequest.Result = input.Result
 
 	if err := h.Repository.SaveGrowthRequest(growthRequest); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{"message": "success", "result": growthRequest.Result})
+	
+	ctx.JSON(http.StatusOK, gin.H{"message": "success"})
 }
+
+
 
 // DeleteGrowthRequest godoc
 // @Summary Удалить заявку на рост
 // @Description Удаляет заявку пользователя
 // @Tags growth_requests
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID заявки"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string

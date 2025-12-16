@@ -13,17 +13,26 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-func (r *Repository) GetAllDataGrowthFactors(title string) ([]ds.DataGrowthFactor, error) {
+func (r *Repository) GetAllDataGrowthFactors(title string, minCoeff, maxCoeff *float64) ([]ds.DataGrowthFactor, error) {
 	var factors []ds.DataGrowthFactor
 
 	query := r.db.Where("is_delete = false")
+
 	if title != "" {
 		query = query.Where("LOWER(title) LIKE LOWER(?)", "%"+title+"%")
+	}
+
+	if minCoeff != nil {
+		query = query.Where("coeff >= ?", *minCoeff)
+	}
+	if maxCoeff != nil {
+		query = query.Where("coeff <= ?", *maxCoeff)
 	}
 
 	err := query.Find(&factors).Error
 	return factors, err
 }
+
 
 func (r *Repository) GetDataGrowthFactorByID(id uint) (*ds.DataGrowthFactor, error) {
 	var factor ds.DataGrowthFactor

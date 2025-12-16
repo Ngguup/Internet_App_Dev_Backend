@@ -34,7 +34,7 @@ func NewHandler(rep *repository.Repository, conf *config.Config, redis *redis.Cl
 // RegisterHandler Функция, в которой мы отдельно регистрируем маршруты, чтобы не писать все в одном месте
 func (h *Handler) RegisterHandler(router *gin.Engine) {
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"}, // или конкретный адрес, например http://127.0.0.1:8080
+		AllowOrigins:     []string{"*"}, 
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -51,21 +51,23 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 
 	api := router.Group("/api")
 	{
+		api.GET("/growth-requests/cart", h.GetCartInfo)
 		api.GET("/data-growth-factors", h.GetAllDataGrowthFactors)
 		api.GET("/data-growth-factors/:id", h.GetDataGrowthFactorByID)
 		// api.POST("/users/register", h.RegisterUser)
 		api.POST("/users/register", h.Register)
 		api.POST("/users/login", h.Login)
+
+		api.PUT("growth-requests/:id/result", h.UpdateGrowthRequestResult)
 	}
 
-	apiCreatorModerator := router.Group("api")
+	apiCreatorModerator := router.Group("/api")
 	apiCreatorModerator.Use(h.WithAuthCheck(role.Creator, role.Moderator))
 	{
 		apiCreatorModerator.POST("/data-growth-factors/:id/add", h.AddDataGrowthFactorToDraft)
 
-		apiCreatorModerator.GET("/growth-requests/cart", h.GetCartInfo)
-
 		apiCreatorModerator.GET("/growth-requests", h.GetGrowthRequests)
+		apiCreatorModerator.GET("/growth-requests/:id", h.GetGrowthRequestByID)
 
 		apiCreatorModerator.PUT("/growth-requests/:id", h.UpdateGrowthRequest)
 		apiCreatorModerator.PUT("/growth-requests/:id/form", h.FormGrowthRequest)
@@ -79,7 +81,7 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 		apiCreatorModerator.POST("/users/logout", h.Logout)
 	}
 
-	apiModerator := router.Group("api")
+	apiModerator := router.Group("/api")
 	apiModerator.Use(h.WithAuthCheck(role.Moderator))
 	{
 		apiModerator.POST("/data-growth-factors", h.CreateDataGrowthFactor)
@@ -87,7 +89,6 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 		apiModerator.DELETE("/data-growth-factors/:id", h.DeleteDataGrowthFactor)
 		apiModerator.POST("/data-growth-factors/:id/image", h.UploadDataGrowthFactorImage)
 
-		apiModerator.GET("/growth-requests/:id", h.GetGrowthRequestByID)
 		apiModerator.PUT("/growth-requests/:id/complete", h.CompleteOrRejectGrowthRequest)
 	}
 

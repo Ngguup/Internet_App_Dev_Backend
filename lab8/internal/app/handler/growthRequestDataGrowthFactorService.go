@@ -12,6 +12,7 @@ import (
 // @Description Удаляет DataGrowthFactor из черновика текущего пользователя
 // @Tags growth_request_data_growth_factors
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID фактора роста"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
@@ -40,6 +41,7 @@ func (h *Handler) DeleteDataGrowthFactorFromDraft(ctx *gin.Context) {
 // @Tags growth_request_data_growth_factors
 // @Accept json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "ID фактора роста"
 // @Param body body object true "Новые данные"
 // @Success 200 {object} map[string]string

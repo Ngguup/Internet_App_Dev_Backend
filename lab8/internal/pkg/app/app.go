@@ -10,17 +10,12 @@ import (
 
 	"fmt"
 	"lab1/internal/app/handler"
-	// "lab1/internal/pkg"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"time"
 )
-
-// type Application struct {
-// 	config *config.Config
-// 	repo   *repository.Repository
-// 	redis  *redis.Client
-// }
 
 type Application struct {
 	Router  *gin.Engine
@@ -28,17 +23,22 @@ type Application struct {
 }
 
 func NewApp(ctx context.Context) (*Application, error) {
-	// cfg, err := config.NewConfig(ctx)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// repo, err := repository.New(dsn.FromEnv())
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	router := gin.Default()
+
+	// -----------------------------
+	// CORS middleware
+	// -----------------------------
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // можно указать конкретно: "http://127.0.0.1:1420"
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	// -----------------------------
+
 	conf, err := config.NewConfig()
 	if err != nil {
 		logrus.Fatalf("error loading config: %v", err)
@@ -52,7 +52,6 @@ func NewApp(ctx context.Context) (*Application, error) {
 		logrus.Fatalf("error initializing repository: %v", errRep)
 	}
 
-
 	redisClient, err := redis.New(ctx, conf.Redis)
 	if err != nil {
 		return nil, err
@@ -61,18 +60,10 @@ func NewApp(ctx context.Context) (*Application, error) {
 	hand := handler.NewHandler(rep, conf, redisClient)
 
 	return &Application{
-		Router: router,
+		Router:  router,
 		Handler: hand,
 	}, nil
 }
-
-// func (a *Application) Run() error {
-// 	log.Println("application start running")
-// 	a.StartServer()
-// 	log.Println("application shut down")
-
-// 	return nil
-// }
 
 func (a *Application) RunApp() {
 	logrus.Info("Server start up")
@@ -81,7 +72,7 @@ func (a *Application) RunApp() {
 	a.Handler.RegisterStatic(a.Router)
 
 	serverAddress := fmt.Sprintf("%s:%d", a.Handler.Config.ServiceHost, a.Handler.Config.ServicePort)
-	if err := a.Router.Run(serverAddress); err != nil {
+	if err := a.Router.RunTLS(serverAddress, "localhost+2.pem", "localhost+2-key.pem",); err != nil {
 		logrus.Fatal(err)
 	}
 	logrus.Info("Server down")

@@ -72,14 +72,11 @@ definitions:
 host: 127.0.0.1:8080
 info:
   contact:
-    email: bitop@spatecon.ru
-    name: API Support
-    url: https://vk.com/bmstu_schedule
-  description: BMSTU Open IT Platform. API для работы с услугами (dataGrowthFactor),
-    заявками (growthRequest) и пользователями.
-  license:
-    name: AS IS (NO WARRANTY)
-  title: BITOP
+    email: konstantinbelicov@gmail.com
+    name: Belikov Konstantin
+  description: BMSTU Open IT Platform. API для работы с факторами роста данных, запросами
+    на прогноз и пользователями.
+  title: Data Growth Forecast
   version: "1.0"
 paths:
   /api/data-growth-factors:
@@ -87,9 +84,17 @@ paths:
       description: Возвращает все услуги (факторы роста) с возможностью фильтрации
         по названию
       parameters:
-      - description: Фильтр по названию
+      - description: Фильтр по названию2
         in: query
         name: title
+        type: string
+      - description: Минимальный коэффициент
+        in: query
+        name: min_coeff
+        type: string
+      - description: Максимальный коэффициент
+        in: query
+        name: max_coeff
         type: string
       produces:
       - application/json
@@ -121,6 +126,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/ds.DataGrowthFactor'
+      security:
+      - BearerAuth: []
       summary: Добавить услугу
       tags:
       - data_growth_factors
@@ -146,6 +153,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Удалить услугу
       tags:
       - data_growth_factors
@@ -197,6 +206,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - BearerAuth: []
       summary: Обновить услугу
       tags:
       - data_growth_factors
@@ -217,6 +228,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Добавить услугу в заявку-черновик
       tags:
       - data_growth_factors
@@ -245,6 +258,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Загрузить изображение услуги
       tags:
       - data_growth_factors
@@ -278,6 +293,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Удалить фактор роста из черновика
       tags:
       - growth_request_data_growth_factors
@@ -319,6 +336,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Обновить значение factor_num
       tags:
       - growth_request_data_growth_factors
@@ -364,7 +383,9 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Получить список заявок на рост
+      security:
+      - BearerAuth: []
+      summary: Получить список заявок на рост 2
       tags:
       - growth_requests
   /api/growth-requests/{id}:
@@ -397,6 +418,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Удалить заявку на рост
       tags:
       - growth_requests
@@ -434,6 +457,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получить заявку по ID
       tags:
       - growth_requests
@@ -472,6 +497,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Обновить заявку на рост
       tags:
       - growth_requests
@@ -509,6 +536,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Завершить или отклонить заявку
       tags:
       - growth_requests
@@ -548,6 +577,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Сформировать заявку на рост
       tags:
       - growth_requests
@@ -571,6 +602,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получение информации о корзине пользователя
       tags:
       - growth_requests
@@ -630,6 +663,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Выход пользователя
       tags:
       - users
@@ -656,6 +691,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Получить текущего пользователя
       tags:
       - users
@@ -691,6 +728,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Обновить пользователя
       tags:
       - users
@@ -730,4 +769,9 @@ paths:
       - users
 schemes:
 - http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
